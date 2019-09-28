@@ -1,0 +1,77 @@
+﻿body {
+    position: relative;
+    background: url("../images/background.jpg");
+    font-size:14px;
+}
+
+#content {
+    position: relative;
+    display: flex;
+    flex-flow: column;
+    margin-left: 20%;
+    margin-right: 20%;
+    align-items: center;
+    margin-top: 20%;
+    border: solid;
+    border-radius: 5px;
+    background-color: white;
+}
+
+#ChooseQuestion {
+    display: flex;
+    flex-flow: row;
+    text-align: right;
+    align-content: center;
+    margin-bottom: 1%;
+}
+
+#AddQuestion {
+    text-align: right;
+    align-content: center;
+    margin-bottom: 1%;
+    margin-bottom: 1%;
+}
+
+#QuizBuildFinish {
+    display: flex;
+    flex-flow: row;
+    text-align: right;
+    align-content: center;
+    margin-bottom: 1%;
+    margin-bottom: 1%;
+}
+
+#ErrorMessage {
+    text-align: center;
+    align-content: center;
+    margin-bottom: 1%;
+}
+
+#QuizTaker {
+    text-align: center;
+    align-content: center;
+    margin-bottom: 1%;
+}
+
+#QuizBody {
+    text-align: left;
+    align-content: center;
+    margin-bottom: 1%;
+}
+
+#NextQuestion {
+    text-align: center;
+    align-content: center;
+    margin-bottom: 1%;
+}
+
+footer{
+    position:fixed;
+    width:100%;
+    bottom:0px;
+    left:0px;
+    text-align:center;
+    background-color:white;
+    padding: 1px;
+    font-size: 10px;
+}

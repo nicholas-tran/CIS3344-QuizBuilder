@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Builder</title>
+    <meta charset="utf-8" />
+    <link href="styles/StyleSheet.css" rel="stylesheet" />
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+    <form>
+        <div id="content">
+            <header><h1>Quiz Builder</h1></header>
+            <div id="ChooseQuestion">
+                <table>
+                    <tr>
+                        <td>
+                            Choose a type of question to add to quiz builder:
+                        </td>
+                        <td>
+                            <select id="ddlQuestionType">
+                                <option value="1">Multiple Choice</option>
+                                <option value="2">True False</option>
+                                <option value="3">Short Answer</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="button" value="Add Question" id="btnAddQuestion" onclick="btnAddQuestion_Click" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="AddQuestion">
+            </div>
+            <div id="QuizBuildFinish">
+                Finished Building?<input type="button" value="Take Quiz" id="btnTakeQuiz" onclick="btnTakeQuiz_Click" />
+            </div>
+            <div id="ErrorMessage"></div>
+        </div>
+    </form>
+    <script>
+
+        var i = 1;
+        var QuestionArray = new Array();
+        $('#AddQuestion').hide();
+        $('#QuizBuildFinish').hide();
+        $(document).ready(function () { $('#btnAddQuestion').on("click", btnAddQuestion_Click); });
+        $(document).ready(function () { $('#btnTakeQuiz').on("click", btnTakeQuiz_Click); });
+
+        function validateQty(event) {
+            var key = window.event ? event.keyCode : event.which;
+
+            if (event.keyCode == 8 || event.keyCode == 46
+             || event.keyCode == 37 || event.keyCode == 39) {
+                return true;
+            }
+            else if (key < 48 || key > 57) {
+                return false;
+            }
+            else return true;
+        };
+
+        function btnAddQuestion_Click() {
+            i = 1;
+            $('#AddQuestion').empty();
+            $('#ChooseQuestion').hide();
+            $('#AddQuestion').show();
+            if ($('#ddlQuestionType').val() == 1) { 
+                $('#AddQuestion').append('Enter the question:<input type="text" id="txtQuestion" required/><br>');
+                $('#AddQuestion').append('Select correct answer:<input type="radio" name="correctAnswer" value="' + i + '">Enter an answer:<input type="text" id="txtAnswer' + i + '" required/><br>');
+                $('#AddQuestion').append('<input type="button" value="Add Answer" id="btnAddAnswer" onclick ="btnAddAnswer_Click" required/><br>');
+                $(document).ready(function () { $('#btnAddAnswer').on("click", btnAddAnswer_Click); });
+                //$('#AddQuestion').append('Enter the first answer:<input type="text" id="txtAnswerA"/><br>');
+                //$('#AddQuestion').append('Enter the second answer:<input type="text" id="txtAnswerB"/><br>');
+                //$('#AddQuestion').append('Enter the third answer:<input type="text" id="txtAnswerC"/><br>');
+                //$('#AddQuestion').append('Enter the fourth answer:<input type="text" id="txtAnswerD"/><br>');
+                //$('#AddQuestion').append('Enter the correct answer number:<input type="text" id="txtCorrectAnswer" onkeypress="return validateQty(event);" required/><br>');
+                $('#AddQuestion').append('Enter the point value for this question:<input type="text" id="txtPointValue" onkeypress="return validateQty(event);" required/><br>');
+                $('#AddQuestion').append('<input type="button" value="Submit" id="btnSubmitQuestion" onclick ="btnSubmitQuestion_Click"/>');
+                $(document).ready(function () { $('#btnSubmitQuestion').on("click", btnSubmitQuestion_Click); });
+            }
+            else if ($('#ddlQuestionType').val() == 2) {
+                $('#AddQuestion').append('Enter the question:<input type="text" id="txtQuestion" required/><br>');
+                $('#AddQuestion').append('Enter the correct answer:<select id="ddlTrueOrFalse"><option value ="1" required> True</option ><option value="0" required>False</option></select><br>');
+                $('#AddQuestion').append('Enter the point value for this question:<input type="text" id="txtPointValue" onkeypress="return validateQty(event);" required/><br>');
+                $('#AddQuestion').append('<input type="button" value="Submit" id="btnSubmitQuestion" onclick ="btnSubmitQuestion_Click"/>');
+                $(document).ready(function () { $('#btnSubmitQuestion').on("click", btnSubmitQuestion_Click); });
+            }
+            else if ($('#ddlQuestionType').val() == 3) {
+                $('#AddQuestion').append('Enter the question:<input type="text" id="txtQuestion" required/><br>');
+                $('#AddQuestion').append('Enter the correct answer:<input type="text" id="txtCorrectAnswer" required/><br>');
+                $('#AddQuestion').append('Enter the point value for this question:<input type="text" id="txtPointValue" onkeypress="return validateQty(event);" required/><br>');
+                $('#AddQuestion').append('<input type="button" value="Submit" id="btnSubmitQuestion" onclick ="btnSubmitQuestion_Click"/>');
+                $(document).ready(function () { $('#btnSubmitQuestion').on("click", btnSubmitQuestion_Click); });
+            }
+        }
+
+        function btnAddAnswer_Click() {
+            i++;
+            $('#btnAddAnswer').before('Select correct answer:<input type="radio" name="correctAnswer" value="' + i + '">Enter an answer:<input type="text" id="txtAnswer' + i + '"/><br>');
+        }
+
+        function btnSubmitQuestion_Click() {
+            $('#ErrorMessage').empty();
+            if ($('#ddlQuestionType').val() == 1) {
+                var question = $('#txtQuestion').val();
+                if (question == "") {
+                    $('#ErrorMessage').append('Question cannot be blank.');
+                    $('#txtQuestion').focus();
+                    return false;
+                }
+                var correctAnswer = $("input[name ='correctAnswer']:checked").val();
+                if (correctAnswer == 0 || correctAnswer == null) {
+                    $('#ErrorMessage').append('Correct answer must be selected.');
+                    $('#txtQuestion').focus();
+                    return;
+                }
+                var multipleChoiceObject = { Type: "MultipleChoice", CorrectAnswer: correctAnswer, StringQuestion: question}
+                var j;
+                for (j = 1; j <= i; j++) {
+                    if ($('#txtAnswer' + j + '').val() == "") {
+                        $('#ErrorMessage').append('Answer cannot be blank.');
+                        return;
+                    }
+                    var key = "Answer" + j.toString();;
+                    multipleChoiceObject[key] = $('#txtAnswer'+j+'').val();
+                }
+                var pointValue = $('#txtPointValue').val();
+                if (pointValue == "") {
+                    $('#ErrorMessage').append('Point value cannot be blank.');
+                    $('#txtPointValue').focus();
+                    return;
+                }
+                multipleChoiceObject["PointValue"] = pointValue;
+                multipleChoiceObject["MultipleChoiceAnswers"] = i;
+                //var answerA = $('#txtAnswerA').val();
+                //var answerB = $('#txtAnswerB').val();
+                //var answerC = $('#txtAnswerC').val();
+                //var answerD = $('#txtAnswerD').val();             
+                //var multipleChoiceObject = { Type: "MultipleChoice", CorrectAnswer: correctAnswer, StringQuestion: question, AnswerA: answerA, AnswerB: answerB, AnswerC: answerC, AnswerD: answerD, PointValue: pointValue };
+                QuestionArray.push(multipleChoiceObject);
+                localStorage.setItem("QuizArray", JSON.stringify(QuestionArray));
+                localStorage.setItem("MultipleChoiceAnswers", i);
+                $('#ChooseQuestion').show();
+                $('#AddQuestion').hide();
+            }
+            else if ($('#ddlQuestionType').val() == 2) {
+                var correctAnswer = $('#ddlTrueOrFalse').val();
+                var question = $('#txtQuestion').val();
+                if (question == "") {
+                    $('#ErrorMessage').append('Question cannot be blank.');
+                    $('#txtQuestion').focus();
+                    return false;
+                }
+                var pointValue = $('#txtPointValue').val();
+                if (pointValue == "") {
+                    $('#ErrorMessage').append('Point value cannot be blank.');
+                    $('#txtPointValue').focus();
+                    return;
+                }
+                var TrueFalseObject = { Type: "TrueFalse", CorrectAnswer: correctAnswer, StringQuestion: question, PointValue: pointValue };
+                QuestionArray.push(TrueFalseObject);
+                localStorage.setItem("QuizArray", JSON.stringify(QuestionArray));
+                $('#ChooseQuestion').show();
+                $('#AddQuestion').hide();
+            }
+            else if ($('#ddlQuestionType').val() == 3) {
+                var question = $('#txtQuestion').val();
+                if (question == "") {
+                    $('#ErrorMessage').append('Question cannot be blank.');
+                    $('#txtQuestion').focus();
+                    return false;
+                }
+                var correctAnswer = $('#txtCorrectAnswer').val();
+                if (correctAnswer == 0 || correctAnswer == null) {
+                    $('#ErrorMessage').append('Correct answer must be selected.');
+                    $('#txtQuestion').focus();
+                    return;
+                }
+                var pointValue = $('#txtPointValue').val();
+                if (pointValue == "") {
+                    $('#ErrorMessage').append('Point value cannot be blank.');
+                    $('#txtPointValue').focus();
+                    return;
+                }
+                var ShortAnswerObject = { Type: "ShortAnswer", CorrectAnswer: correctAnswer, StringQuestion: question, PointValue: pointValue };
+                QuestionArray.push(ShortAnswerObject);
+                localStorage.setItem("QuizArray", JSON.stringify(QuestionArray));
+                $('#ChooseQuestion').show();
+                $('#AddQuestion').hide();
+            }
+            $('#QuizBuildFinish').show();
+        }
+
+        function btnTakeQuiz_Click() {
+            localStorage.setItem("QuizArray", JSON.stringify(QuestionArray));
+            window.location.replace("QuizTaker.html");
+        }
+
+    </script>
+    <footer><h1>Website by Nicholas Tran | tug26951@temple.edu</h1></footer>
+</body>
+</html>

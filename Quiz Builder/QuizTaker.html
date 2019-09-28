@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Taker</title>
+    <meta charset="utf-8" />
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+    <link href="styles/StyleSheet.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="content">
+        <header><h1>Quiz Taker</h1></header>
+        <div id="QuizTaker">
+            <input type="button" value="Begin Quiz" id="btnBeginQuiz" onclick="btnBeginQuiz_Click" />
+        </div>
+        <div id="QuizBody">
+        </div>
+        <div id="NextQuestion">
+            <input type="button" value="Next" id="btnNextQuestion" onclick="btnNextQuestion_Click" />
+        </div>
+    </div>
+    <footer><h1>Website by Nicholas Tran | tug26951@temple.edu</h1></footer>
+    <script>
+        var QuestionArray = JSON.parse(localStorage.getItem("QuizArray"));
+        $(document).ready(function () { $('#btnBeginQuiz').on("click", btnBeginQuiz_Click); });
+        $(document).ready(function () { $('#btnNextQuestion').on("click", btnNextQuestion_Click); });
+        var correct = 0;
+        var totalPoints = 0;
+        var quizObj;
+        var rounds = 0;
+        $('#QuizBody').hide();
+        $('#NextQuestion').hide();
+
+        function btnBeginQuiz_Click() {
+            rounds++;
+            $('#QuizBody').show();
+            $('#QuizTaker').hide();
+            $('#QuizTaker').empty();
+            $('#QuizBody').empty();
+            quizObj = QuestionArray.shift();
+            if (quizObj.Type == "MultipleChoice") {
+                var string = quizObj;
+                var i = quizObj.MultipleChoiceAnswers;
+                localStorage.setItem("QuizObject", JSON.stringify(string));
+                $('#QuizBody').append(quizObj.StringQuestion + '<br>');
+                $('#QuizBody').append('<select id="ddlMultipleChoice">');
+                var j;
+                for (j = 1; j <= i; j++) {
+                    $('#ddlMultipleChoice').append('<option value="' + j + '">' + quizObj["Answer" + j.toString()] + '</option>');
+                }
+                //$('#QuizBody').append('<select id="ddlMultipleChoice"><option value="1">' + quizObj.AnswerA + '</option><option value="2">' + quizObj.AnswerB + '</option><option value="3">' + quizObj.AnswerC + '</option><option value="4">' + quizObj.AnswerD + '</option></select>');
+                $('#QuizBody').append('<input type="button" value="Submit" id="btnSubmitGuess" onclick ="btnSubmitGuess_Click"/>');
+                $(document).ready(function () { $('#btnSubmitGuess').on("click", btnSubmitGuess_Click); });
+            }
+            else if (quizObj.Type == "TrueFalse") {
+                var string = quizObj;
+                localStorage.setItem("QuizObject", JSON.stringify(string));
+                $('#QuizBody').append(quizObj.StringQuestion + '<br>');
+                $('#QuizBody').append('<input type="radio" id = "rdoTrue" name="trueFalse" value="1"> True<br><input type="radio" id="rdoFalse" name="trueFalse" value="0"> False<br>');
+                $('#QuizBody').append('<input type="button" value="Submit" id="btnSubmitGuess" onclick ="btnSubmitGuess_Click"/>');
+                $(document).ready(function () { $('#btnSubmitGuess').on("click", btnSubmitGuess_Click); });
+            }
+            else if (quizObj.Type == "ShortAnswer") {
+                var string = quizObj;
+                localStorage.setItem("QuizObject", JSON.stringify(string));
+                $('#QuizBody').append(quizObj.StringQuestion + '<br>');
+                $('#QuizBody').append('<input type="text" id="txtShortAnswer" name="shortAnswer"/><br>');
+                $('#QuizBody').append('<input type="button" value="Submit" id="btnSubmitGuess" onclick ="btnSubmitGuess_Click"/>');
+                $(document).ready(function () { $('#btnSubmitGuess').on("click", btnSubmitGuess_Click); });
+            }
+        }
+
+        function btnSubmitGuess_Click() {
+            quizObj = JSON.parse(localStorage.getItem("QuizObject"));
+            console.dir(quizObj);
+            if (quizObj.Type == "MultipleChoice") {
+                var guess = $('#ddlMultipleChoice').val();
+                var answer = quizObj.CorrectAnswer;
+                if (guess == answer) {
+                    totalPoints = totalPoints + parseInt(quizObj.PointValue);
+                    $('#QuizBody').empty();
+                    $('#QuizBody').append('<p>Correct Answer.<br> Points: ' + totalPoints + '<br>Answer: ' + answer + '<br>Guess: ' + guess + '</p>');
+                    correct++;
+                }
+                else {
+                    $('#QuizBody').empty();
+                    $('#QuizBody').append('<p>Wrong Answer.<br> Points: ' + totalPoints + '<br>Answer: ' + answer + '<br>Guess: ' + guess + '</p>');
+                }
+            }
+            else if (quizObj.Type == "TrueFalse") {
+                var guess = $("input[name ='trueFalse']:checked").val();
+                var answer = quizObj.CorrectAnswer;
+                if (guess == answer) {
+                    totalPoints = totalPoints + parseInt(quizObj.PointValue);
+                    $('#QuizBody').empty();
+                    $('#QuizBody').append('<p>Correct Answer.<br> Points: ' + totalPoints + '<br>Answer: ' + answer + '<br>Guess: ' + guess + '</p>');
+                    correct++;
+                }
+                else {
+                    $('#QuizBody').empty();
+                    $('#QuizBody').append('<p>Wrong Answer.<br> Points: ' + totalPoints + '<br>Answer: ' + answer + '<br>Guess: ' + guess + '</p>');
+                }
+            }
+            else if (quizObj.Type == "ShortAnswer") {
+                var guess = $('#txtShortAnswer').val();
+                var answer = quizObj.CorrectAnswer;
+                if (guess == answer) {
+                    totalPoints = totalPoints + parseInt(quizObj.PointValue);
+                    $('#QuizBody').empty();
+                    $('#QuizBody').append('<p>Correct Answer.<br> Points: ' + totalPoints + '<br>Answer: ' + answer + '<br>Guess: ' + guess + '</p>');
+                    correct++;
+                }
+                else {
+                    $('#QuizBody').empty();
+                    $('#QuizBody').append('<p>Wrong Answer.<br> Points: ' + totalPoints + '<br>Answer: ' + answer + '<br>Guess: ' + guess + '</p>');
+                }
+            }
+            $('#NextQuestion').show();
+            if (QuestionArray.length == 0) {
+                $('#QuizBody').show();
+                $('#NextQuestion').empty();
+                var grade = (correct / rounds) * 100;
+                $('#NextQuestion').append('<p> Congratualations! After ' + rounds + ' rounds. You scored ' + totalPoints + ' points. Your grade: '+grade+'.</p>');
+                $('#NextQuestion').append('Go back to quiz builder:<input type="button" value="Go Back" id="btnGoBack" onclick ="btnGoBack_Click"/>');
+                $(document).ready(function () { $('#btnGoBack').on("click", btnGoBack_Click); });
+                return;
+            }
+        }
+
+
+        function btnNextQuestion_Click() {
+            rounds++;
+            $('#NextQuestion').hide();
+            $('#QuizBody').show();
+            $('#QuizBody').empty();
+            quizObj = QuestionArray.shift();
+            if (quizObj.Type == "MultipleChoice") {
+                var string = quizObj;
+                var i = quizObj.MultipleChoiceAnswers;
+                localStorage.setItem("QuizObject", JSON.stringify(string));
+                $('#QuizBody').append(quizObj.StringQuestion + '<br>');
+                $('#QuizBody').append('<select id="ddlMultipleChoice">');
+                var j;
+                for (j = 1; j <= i; j++) {
+                    $('#ddlMultipleChoice').append('<option value="' + j + '">' + quizObj["Answer" + j.toString()] + '</option>');
+                }
+                //$('#QuizBody').append('<select id="ddlMultipleChoice"><option value="1">' + quizObj.AnswerA + '</option><option value="2">' + quizObj.AnswerB + '</option><option value="3">' + quizObj.AnswerC + '</option><option value="4">' + quizObj.AnswerD + '</option></select>');
+                $('#QuizBody').append('<input type="button" value="Submit" id="btnSubmitGuess" onclick ="btnSubmitGuess_Click"/>');
+                $(document).ready(function () { $('#btnSubmitGuess').on("click", btnSubmitGuess_Click); });
+            }
+            else if (quizObj.Type == "TrueFalse") {
+                var string = quizObj;
+                localStorage.setItem("QuizObject", JSON.stringify(string));
+                $('#QuizBody').append(quizObj.StringQuestion + '<br>');
+                $('#QuizBody').append('<input type="radio" id="rdoTrue" name="trueFalse" value="1"> True<br><input type="radio" id="rdoFalse" name="trueFalse" value="0"> False<br>');
+                $('#QuizBody').append('<input type="button" value="Submit" id="btnSubmitGuess" onclick ="btnSubmitGuess_Click"/>');
+                $(document).ready(function () { $('#btnSubmitGuess').on("click", btnSubmitGuess_Click); });
+            }
+            else if (quizObj.Type == "ShortAnswer") {
+                var string = quizObj;
+                localStorage.setItem("QuizObject", JSON.stringify(string));
+                $('#QuizBody').append(quizObj.StringQuestion + '<br>');
+                $('#QuizBody').append('<input type="text" id="txtShortAnswer" name="shortAnswer"/><br>');
+                $('#QuizBody').append('<input type="button" value="Submit" id="btnSubmitGuess" onclick ="btnSubmitGuess_Click"/>');
+                $(document).ready(function () { $('#btnSubmitGuess').on("click", btnSubmitGuess_Click); });
+            }
+        }
+
+        function btnGoBack_Click() {
+            window.location.replace("Index.html");
+        }
+    </script>
+</body>
+</html>
